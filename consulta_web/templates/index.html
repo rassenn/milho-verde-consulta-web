@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Consulta geral</h1>
+  <p>Resumo atualizado pelo PostgreSQL</p>
+</section>
+
+<section class="cards">
+  <article><span>Vendas</span><strong>{{ resumo.qtd_vendas }}</strong></article>
+  <article><span>Clientes</span><strong>{{ resumo.qtd_clientes }}</strong></article>
+  <article><span>Total clientes</span><strong>{{ resumo.total_clientes|dinheiro }}</strong></article>
+  <article><span>Total produtores</span><strong>{{ resumo.total_produtores|dinheiro }}</strong></article>
+  <article><span>Pago produtores</span><strong>{{ resumo.pago_produtores|dinheiro }}</strong></article>
+  <article><span>Pendente produtores</span><strong>{{ resumo.pendente_produtores|dinheiro }}</strong></article>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <h2>Vendas recentes</h2>
+    <a href="{{ url_for('vendas') }}">Ver todas</a>
+  </div>
+  {% for v in recentes %}
+    <div class="row-card">
+      <div>
+        <strong>{{ v.cliente }}</strong>
+        <small>{{ v.data }} · {{ v.produtor }}</small>
+      </div>
+      <span>{{ v.valor_cliente|dinheiro }}</span>
+    </div>
+  {% endfor %}
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <h2>Holerits {{ mes_ref }}</h2>
+    <a href="{{ url_for('holerits', mes=mes_ref) }}">Abrir</a>
+  </div>
+  {% for h in holerits %}
+    <div class="row-card">
+      <div>
+        <strong>{{ h.nome }}</strong>
+        <small>Bruto {{ h.valor_bruto|dinheiro }} · Vale {{ h.vale|dinheiro }}</small>
+      </div>
+      <span>{{ h.valor_liquido|dinheiro }}</span>
+    </div>
+  {% else %}
+    <p class="empty">Nenhum holerit encontrado para o mês.</p>
+  {% endfor %}
+</section>
+{% endblock %}
