@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero compact">
+  <h1>{{ titulo }}</h1>
+  <form class="search {% if rota == 'produtores' %}producer-search{% endif %}" method="get">
+    <input name="q" value="{{ termo }}" placeholder="Nome">
+    {% if rota == 'produtores' %}
+      <select name="fazenda">
+        <option value="">Todas as fazendas</option>
+        {% for f in fazendas or [] %}
+          <option value="{{ f.nome }}" {% if fazenda == f.nome %}selected{% endif %}>{{ f.nome }}</option>
+        {% endfor %}
+      </select>
+      <input name="data" value="{{ data or '' }}" placeholder="Data">
+    {% endif %}
+    <button>Buscar</button>
+  </form>
+</section>
+
+<section class="panel">
+  {% for p in rows %}
+    <div class="row-card">
+      <div>
+        <strong>{{ p.nome }}</strong>
+        <small>{{ p.cidade }} · {{ p.telefone }}</small>
+      </div>
+      <div class="right">
+        <span>{{ p.saldo|dinheiro }}</span>
+        <small>{{ p.situacao }}</small>
+      </div>
+    </div>
+  {% else %}
+    <p class="empty">Nenhum registro encontrado.</p>
+  {% endfor %}
+</section>
+
+{% if termo %}
+  <section class="cards movement-summary">
+    <article><span>Vendas</span><strong>{{ totais.qtd }}</strong></article>
+    <article><span>Peso</span><strong>{{ totais.peso|round(0) }} kg</strong></article>
+    {% if rota == 'produtores' %}
+      <article><span>Total</span><strong>{{ totais.valor|dinheiro }}</strong></article>
+      <article><span>Pago</span><strong>{{ totais.pago|dinheiro }}</strong></article>
+      <article><span>Pendente</span><strong>{{ totais.pendente|dinheiro }}</strong></article>
+    {% else %}
+      <article><span>Valor</span><strong>{{ totais.valor|dinheiro }}</strong></article>
+    {% endif %}
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Movimentos</h2>
+      <small>Últimos 20 registros</small>
+    </div>
+    {% for m in movimentos %}
+      <div class="sale-card">
+        <div class="sale-main">
+          {% if rota == 'produtores' %}
+            <strong>{{ m.cliente }}</strong>
+            <small>{{ m.data }} · {{ m.fazenda or 'Sem fazenda' }} · {{ m.peso|round(0) }} kg</small>
+          {% else %}
+            <strong>{{ m.produtor }}</strong>
+            <small>{{ m.data }} · {{ m.peso|round(0) }} kg</small>
+          {% endif %}
+        </div>
+        <div class="sale-values">
+          <span>{{ m.valor|dinheiro }}</span>
+          <small>{{ m.situacao }}</small>
+        </div>
+      </div>
+    {% else %}
+      <p class="empty">Nenhum movimento encontrado para esse filtro.</p>
+    {% endfor %}
+  </section>
+{% endif %}
+{% endblock %}
