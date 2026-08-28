@@ -3,12 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ title or "Milho Verde Consulta" }}</title>
+  <title>{{ title or "Milho Verde Sao Jose - Consulta" }}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="{{ url_for('index') }}">Milho Verde</a>
+    <a class="brand" href="{{ url_for('index') }}">
+      <img src="{{ url_for('static', filename='logo-milho-verde-sao-jose.png') }}" alt="">
+      <span>Milho Verde Sao Jose</span>
+    </a>
     <nav>
       <a href="{{ url_for('vendas') }}">Vendas</a>
       <a href="{{ url_for('clientes') }}">Clientes</a>

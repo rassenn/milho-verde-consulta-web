@@ -265,6 +265,7 @@ def vendas():
 @login_required
 def clientes():
     termo = request.args.get("q", "").strip()
+    detalhe = request.args.get("detalhe", "").strip()
     params = []
     sql = """
         SELECT nome, cidade, telefone, COALESCE(saldo, 0) AS saldo,
@@ -280,34 +281,43 @@ def clientes():
     rows = query(sql, params)
 
     movimentos = []
-    totais = {"peso": 0, "valor": 0, "qtd": 0}
-    if termo:
+    pagamentos = []
+    totais = {"peso": 0, "valor": 0, "pendente": 0, "qtd": 0}
+    pessoa_detalhe = detalhe or termo
+    if pessoa_detalhe:
+        operador = "=" if detalhe else "ILIKE"
+        busca_detalhe = pessoa_detalhe if detalhe else f"%{pessoa_detalhe}%"
         movimentos = query(
             f"""
-            SELECT v.data, v.produtor, COALESCE(v.peso, 0) AS peso,
+            SELECT v.data, COALESCE(v.romaneio, '') AS romaneio, v.produtor,
+                   COALESCE(v.peso, 0) AS peso,
                    COALESCE(v.valor_cliente, 0) AS valor,
                    COALESCE(v.situacao_cliente, '') AS situacao
             FROM vendas v
-            WHERE v.cliente ILIKE %s
+            WHERE v.cliente {operador} %s
+              AND UPPER(COALESCE(v.situacao_cliente, '')) <> 'PAGO'
             ORDER BY {DATA_VENDA_EXPR} DESC, v.id DESC
             LIMIT 20
             """,
-            (f"%{termo}%",),
+            (busca_detalhe,),
         )
         total_row = query(
-            """
+            f"""
             SELECT COALESCE(SUM(peso), 0) AS peso,
                    COALESCE(SUM(valor_cliente), 0) AS valor,
+                   COALESCE(SUM(CASE WHEN UPPER(COALESCE(situacao_cliente, '')) = 'PAGO'
+                                     THEN 0 ELSE valor_cliente END), 0) AS pendente,
                    COUNT(*) AS qtd
             FROM vendas
-            WHERE cliente ILIKE %s
+            WHERE cliente {operador} %s
             """,
-            (f"%{termo}%",),
+            (busca_detalhe,),
             one=True,
         )
         totais = {
             "peso": float(total_row["peso"] or 0),
             "valor": float(total_row["valor"] or 0),
+            "pendente": float(total_row["pendente"] or 0),
             "qtd": int(total_row["qtd"] or 0),
         }
 
@@ -317,7 +327,10 @@ def clientes():
         rota="clientes",
         rows=rows,
         termo=termo,
+        detalhe=detalhe,
+        pessoa_detalhe=pessoa_detalhe,
         movimentos=movimentos,
+        pagamentos=pagamentos,
         totais=totais,
     )
 
@@ -326,6 +339,7 @@ def clientes():
 @login_required
 def produtores():
     termo = request.args.get("q", "").strip()
+    detalhe = request.args.get("detalhe", "").strip()
     fazenda = request.args.get("fazenda", "").strip()
     data = request.args.get("data", "").strip()
     data_sql = normalizar_data_filtro(data)
@@ -344,22 +358,26 @@ def produtores():
     rows = query(sql, params)
 
     movimentos = []
+    pagamentos = []
     fazendas = []
     totais = {"peso": 0, "valor": 0, "pago": 0, "pendente": 0, "qtd": 0}
-    if termo:
+    pessoa_detalhe = detalhe or termo
+    if pessoa_detalhe:
+        operador = "=" if detalhe else "ILIKE"
+        busca_detalhe = pessoa_detalhe if detalhe else f"%{pessoa_detalhe}%"
         fazendas = query(
-            """
+            f"""
             SELECT DISTINCT COALESCE(fp.nome_fazenda, '') AS nome
             FROM vendas v
             LEFT JOIN fazendas_produtor fp ON fp.id = v.fazenda_id
-            WHERE v.produtor ILIKE %s
+            WHERE v.produtor {operador} %s
               AND COALESCE(fp.nome_fazenda, '') <> ''
             ORDER BY nome
             """,
-            (f"%{termo}%",),
+            (busca_detalhe,),
         )
-        filtros = ["v.produtor ILIKE %s"]
-        mov_params = [f"%{termo}%"]
+        filtros = [f"v.produtor {operador} %s"]
+        mov_params = [busca_detalhe]
         if fazenda:
             filtros.append("COALESCE(fp.nome_fazenda, '') = %s")
             mov_params.append(fazenda)
@@ -404,6 +422,21 @@ def produtores():
             "pendente": float(total_row["pendente"] or 0),
             "qtd": int(total_row["qtd"] or 0),
         }
+        pagamentos = query(
+            f"""
+            SELECT data, COALESCE(valor_pago, 0) AS valor,
+                   COALESCE(forma_pagamento, '') AS forma
+            FROM pagamentos_produtor
+            WHERE nome_produtor {operador} %s
+            ORDER BY CASE WHEN substr(data,5,1) = '-'
+                          THEN data
+                          ELSE substr(data,7,4) || '-' || substr(data,4,2) || '-' || substr(data,1,2)
+                     END DESC,
+                     id DESC
+            LIMIT 20
+            """,
+            (busca_detalhe,),
+        )
 
     return render_template(
         "pessoas.html",
@@ -411,10 +444,13 @@ def produtores():
         rota="produtores",
         rows=rows,
         termo=termo,
+        detalhe=detalhe,
+        pessoa_detalhe=pessoa_detalhe,
         fazenda=fazenda,
         fazendas=fazendas,
         data=data,
         movimentos=movimentos,
+        pagamentos=pagamentos,
         totais=totais,
     )
 

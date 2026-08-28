@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Milho Verde - Consulta</title>
+  <title>Milho Verde Sao Jose - Consulta</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="login-body">
   <main class="login-box">
-    <h1>Milho Verde</h1>
+    <img class="login-logo" src="{{ url_for('static', filename='logo-milho-verde-sao-jose.png') }}" alt="">
+    <h1>Milho Verde Sao Jose</h1>
     <p>Consulta do sistema</p>
     {% if erro %}<div class="alert">{{ erro }}</div>{% endif %}
     <form method="post">

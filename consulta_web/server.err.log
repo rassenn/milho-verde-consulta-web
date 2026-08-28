@@ -1,0 +1,47 @@
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.105:5000
+Press CTRL+C to quit
+192.168.1.164 - - [13/Aug/2026 10:10:57] "GET / HTTP/1.1" 302 -
+192.168.1.164 - - [13/Aug/2026 10:10:57] "GET /login HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 10:10:57] "GET /static/style.css HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 10:10:57] "GET /favicon.ico HTTP/1.1" 404 -
+192.168.1.164 - - [13/Aug/2026 10:11:13] "POST /login HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 10:11:13] "GET /static/style.css HTTP/1.1" 304 -
+192.168.1.164 - - [13/Aug/2026 10:11:28] "POST /login HTTP/1.1" 302 -
+192.168.1.164 - - [13/Aug/2026 10:11:29] "GET / HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 10:11:29] "GET /static/style.css HTTP/1.1" 304 -
+192.168.1.164 - - [13/Aug/2026 10:11:54] "GET /vendas HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 10:11:54] "GET /static/style.css HTTP/1.1" 304 -
+192.168.1.164 - - [13/Aug/2026 10:13:19] "GET /clientes HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 10:13:19] "GET /static/style.css HTTP/1.1" 304 -
+192.168.1.164 - - [13/Aug/2026 10:13:31] "GET /produtores HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 10:13:32] "GET /static/style.css HTTP/1.1" 304 -
+192.168.1.164 - - [13/Aug/2026 10:13:41] "GET /holerits HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 10:13:41] "GET /static/style.css HTTP/1.1" 304 -
+192.168.1.164 - - [13/Aug/2026 10:14:39] "GET /holerits?mes=2026-08&q=Ronei HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 10:14:39] "GET /static/style.css HTTP/1.1" 304 -
+192.168.1.164 - - [13/Aug/2026 10:15:09] "GET /holerits?mes=2026-08&q=Diego HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 10:15:09] "GET /static/style.css HTTP/1.1" 304 -
+192.168.1.164 - - [13/Aug/2026 10:16:23] "GET /holerits?mes=2026-08&q=Diego HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 10:16:23] "GET /static/style.css HTTP/1.1" 304 -
+192.168.1.164 - - [13/Aug/2026 10:26:38] "GET /holerits?mes=2026-08&q=Diego HTTP/1.1" 302 -
+192.168.1.164 - - [13/Aug/2026 10:26:38] "GET /login HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 10:26:38] "GET /static/style.css HTTP/1.1" 304 -
+192.168.1.164 - - [13/Aug/2026 10:26:38] "GET /favicon.ico HTTP/1.1" 404 -
+192.168.1.164 - - [13/Aug/2026 10:26:47] "POST /login HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 10:26:47] "GET /static/style.css HTTP/1.1" 304 -
+192.168.1.164 - - [13/Aug/2026 10:26:55] "POST /login HTTP/1.1" 302 -
+192.168.1.164 - - [13/Aug/2026 10:26:55] "GET / HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 10:26:55] "GET /static/style.css HTTP/1.1" 304 -
+192.168.1.164 - - [13/Aug/2026 10:27:01] "GET /holerits HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 10:27:01] "GET /static/style.css HTTP/1.1" 304 -
+192.168.1.164 - - [13/Aug/2026 10:27:05] "GET /holerits?mes=2026-08&q=Diego HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 10:27:05] "GET /static/style.css HTTP/1.1" 304 -
+192.168.1.164 - - [13/Aug/2026 10:27:26] "GET /holerits?mes=2026-08&q=Diemersom HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 10:27:26] "GET /static/style.css HTTP/1.1" 304 -
+192.168.1.164 - - [13/Aug/2026 10:43:51] "GET /holerits?mes=2026-08&q=Diego HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 10:43:51] "GET /static/style.css HTTP/1.1" 304 -
+192.168.1.164 - - [13/Aug/2026 11:13:04] "GET /holerits?mes=2026-08&q=Diego HTTP/1.1" 200 -
+192.168.1.164 - - [13/Aug/2026 11:13:04] "GET /static/style.css HTTP/1.1" 304 -

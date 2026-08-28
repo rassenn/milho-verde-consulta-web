@@ -22,11 +22,12 @@
     <div class="row-card">
       <div>
         <strong>{{ p.nome }}</strong>
-        <small>{{ p.cidade }} · {{ p.telefone }}</small>
+        <small>{{ p.cidade }} - {{ p.telefone }}</small>
       </div>
-      <div class="right">
+      <div class="right row-actions">
         <span>{{ p.saldo|dinheiro }}</span>
         <small>{{ p.situacao }}</small>
+        <a class="mini-button" href="{{ url_for(rota, q=termo, detalhe=p.nome, fazenda=fazenda or '', data=data or '') }}">Resumo</a>
       </div>
     </div>
   {% else %}
@@ -34,9 +35,9 @@
   {% endfor %}
 </section>
 
-{% if termo %}
+{% if pessoa_detalhe %}
   <section class="cards movement-summary">
-    <article><span>Vendas</span><strong>{{ totais.qtd }}</strong></article>
+    <article><span>{{ pessoa_detalhe }}</span><strong>{{ totais.qtd }}</strong></article>
     <article><span>Peso</span><strong>{{ totais.peso|round(0) }} kg</strong></article>
     {% if rota == 'produtores' %}
       <article><span>Total</span><strong>{{ totais.valor|dinheiro }}</strong></article>
@@ -44,23 +45,24 @@
       <article><span>Pendente</span><strong>{{ totais.pendente|dinheiro }}</strong></article>
     {% else %}
       <article><span>Valor</span><strong>{{ totais.valor|dinheiro }}</strong></article>
+      <article><span>Pendente</span><strong>{{ totais.pendente|dinheiro }}</strong></article>
     {% endif %}
   </section>
 
   <section class="panel">
     <div class="panel-head">
-      <h2>Movimentos</h2>
-      <small>Últimos 20 registros</small>
+      <h2>{% if rota == 'produtores' %}Cargas do produtor{% else %}Cargas pendentes{% endif %}</h2>
+      <small>Ultimos 20 registros</small>
     </div>
     {% for m in movimentos %}
       <div class="sale-card">
         <div class="sale-main">
           {% if rota == 'produtores' %}
             <strong>{{ m.cliente }}</strong>
-            <small>{{ m.data }} · {{ m.fazenda or 'Sem fazenda' }} · {{ m.peso|round(0) }} kg</small>
+            <small>{{ m.data }} - {{ m.fazenda or 'Sem fazenda' }} - {{ m.peso|round(0) }} kg</small>
           {% else %}
             <strong>{{ m.produtor }}</strong>
-            <small>{{ m.data }} · {{ m.peso|round(0) }} kg</small>
+            <small>{{ m.data }} - {{ m.romaneio or 'Sem romaneio' }} - {{ m.peso|round(0) }} kg</small>
           {% endif %}
         </div>
         <div class="sale-values">
@@ -72,5 +74,25 @@
       <p class="empty">Nenhum movimento encontrado para esse filtro.</p>
     {% endfor %}
   </section>
+
+  {% if rota == 'produtores' %}
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Pagamentos efetuados</h2>
+        <small>Ultimos 20 registros</small>
+      </div>
+      {% for pg in pagamentos %}
+        <div class="pay-line">
+          <div>
+            <strong>{{ pg.forma or 'Forma nao informada' }}</strong>
+            <small>{{ pg.data }}</small>
+          </div>
+          <span>{{ pg.valor|dinheiro }}</span>
+        </div>
+      {% else %}
+        <p class="empty">Nenhum pagamento encontrado para esse produtor.</p>
+      {% endfor %}
+    </section>
+  {% endif %}
 {% endif %}
 {% endblock %}
