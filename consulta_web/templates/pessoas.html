@@ -27,7 +27,7 @@
       <div class="right row-actions">
         <span>{{ p.saldo|dinheiro }}</span>
         <small>{{ p.situacao }}</small>
-        <a class="mini-button" href="{{ url_for(rota, q=termo, detalhe=p.nome, fazenda=fazenda or '', data=data or '') }}">Resumo</a>
+        <a class="mini-button" href="{{ url_for(rota, q=p.nome, fazenda=fazenda or '', data=data or '') }}">Resumo</a>
       </div>
     </div>
   {% else %}
@@ -51,11 +51,11 @@
 
   <section class="panel">
     <div class="panel-head">
-      <h2>{% if rota == 'produtores' %}Cargas do produtor{% else %}Cargas pendentes{% endif %}</h2>
+      <h2>{% if rota == 'produtores' %}Cargas do produtor{% else %}Cargas do cliente{% endif %}</h2>
       <small>Ultimos 20 registros</small>
     </div>
     {% for m in movimentos %}
-      <div class="sale-card">
+      <div class="sale-card {% if m.situacao|upper in ['PENDENTE', 'PARCIAL'] %}sale-alert{% endif %}">
         <div class="sale-main">
           {% if rota == 'produtores' %}
             <strong>{{ m.cliente }}</strong>
@@ -63,11 +63,15 @@
           {% else %}
             <strong>{{ m.produtor }}</strong>
             <small>{{ m.data }} - {{ m.romaneio or 'Sem romaneio' }} - {{ m.peso|round(0) }} kg</small>
+            <p>{{ m.pagamentos_obs or 'Sem pagamento lancado' }}</p>
           {% endif %}
         </div>
         <div class="sale-values">
           <span>{{ m.valor|dinheiro }}</span>
           <small>{{ m.situacao }}</small>
+          {% if m.pendente is defined and m.pendente %}
+            <em>Pendente {{ m.pendente|dinheiro }}</em>
+          {% endif %}
         </div>
       </div>
     {% else %}

@@ -292,10 +292,25 @@ def clientes():
             SELECT v.data, COALESCE(v.romaneio, '') AS romaneio, v.produtor,
                    COALESCE(v.peso, 0) AS peso,
                    COALESCE(v.valor_cliente, 0) AS valor,
+                   COALESCE(SUM(CASE WHEN UPPER(COALESCE(p.forma, '')) <> 'PENDENTE'
+                                     THEN p.valor ELSE 0 END), 0) AS pago,
+                   GREATEST(
+                       COALESCE(v.valor_cliente, 0)
+                       - COALESCE(SUM(CASE WHEN UPPER(COALESCE(p.forma, '')) <> 'PENDENTE'
+                                           THEN p.valor ELSE 0 END), 0),
+                       0
+                   ) AS pendente,
+                   STRING_AGG(
+                       CASE WHEN UPPER(COALESCE(p.forma, '')) <> 'PENDENTE'
+                            THEN p.forma || ' R$ ' || REPLACE(TO_CHAR(COALESCE(p.valor, 0), 'FM999G999G990D00'), '.', ',')
+                       END,
+                       ' | '
+                   ) AS pagamentos_obs,
                    COALESCE(v.situacao_cliente, '') AS situacao
             FROM vendas v
+            LEFT JOIN pagamentos p ON p.id_venda = v.id
             WHERE v.cliente {operador} %s
-              AND UPPER(COALESCE(v.situacao_cliente, '')) <> 'PAGO'
+            GROUP BY v.id, v.data, v.romaneio, v.produtor, v.peso, v.valor_cliente, v.situacao_cliente
             ORDER BY {DATA_VENDA_EXPR} DESC, v.id DESC
             LIMIT 20
             """,
@@ -303,13 +318,24 @@ def clientes():
         )
         total_row = query(
             f"""
-            SELECT COALESCE(SUM(peso), 0) AS peso,
-                   COALESCE(SUM(valor_cliente), 0) AS valor,
-                   COALESCE(SUM(CASE WHEN UPPER(COALESCE(situacao_cliente, '')) = 'PAGO'
-                                     THEN 0 ELSE valor_cliente END), 0) AS pendente,
+            SELECT COALESCE(SUM(valor_base.peso), 0) AS peso,
+                   COALESCE(SUM(valor_base.valor), 0) AS valor,
+                   COALESCE(SUM(valor_base.pendente), 0) AS pendente,
                    COUNT(*) AS qtd
-            FROM vendas
-            WHERE cliente {operador} %s
+            FROM (
+                SELECT v.id, COALESCE(v.peso, 0) AS peso,
+                       COALESCE(v.valor_cliente, 0) AS valor,
+                       GREATEST(
+                           COALESCE(v.valor_cliente, 0)
+                           - COALESCE(SUM(CASE WHEN UPPER(COALESCE(p.forma, '')) <> 'PENDENTE'
+                                               THEN p.valor ELSE 0 END), 0),
+                           0
+                       ) AS pendente
+                FROM vendas v
+                LEFT JOIN pagamentos p ON p.id_venda = v.id
+                WHERE v.cliente {operador} %s
+                GROUP BY v.id, v.peso, v.valor_cliente
+            ) valor_base
             """,
             (busca_detalhe,),
             one=True,
@@ -390,6 +416,7 @@ def produtores():
             SELECT v.data, v.cliente, COALESCE(fp.nome_fazenda, '') AS fazenda,
                    COALESCE(v.peso, 0) AS peso,
                    COALESCE(v.pag_produtor, 0) AS valor,
+                   COALESCE(v.valor_pendente, 0) AS pendente,
                    COALESCE(v.situacao_produtor, '') AS situacao
             FROM vendas v
             LEFT JOIN fazendas_produtor fp ON fp.id = v.fazenda_id

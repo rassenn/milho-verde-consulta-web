@@ -165,6 +165,27 @@ small {
   grid-template-columns: 1fr auto;
   gap: 8px;
 }
+.sale-card.sale-alert {
+  margin-left: -10px;
+  margin-right: -10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  border-left: 4px solid #c83224;
+  background: #fff3f0;
+}
+.sale-main p {
+  margin: 6px 0 0;
+  color: #33412f;
+  font-size: 13px;
+}
+.sale-values em {
+  display: block;
+  margin-top: 4px;
+  color: #c83224;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 800;
+}
 .tags {
   grid-column: 1 / -1;
   display: flex;
@@ -321,13 +342,14 @@ button {
   border: 1px solid var(--line);
   padding: 22px;
   box-shadow: 0 18px 40px rgba(0,0,0,.2);
+  text-align: center;
 }
 .login-logo {
-  width: 92px;
-  height: 92px;
+  width: 126px;
+  height: 126px;
   object-fit: contain;
   display: block;
-  margin-bottom: 12px;
+  margin: 0 auto 14px;
 }
 .login-box h1 {
   margin: 0;
