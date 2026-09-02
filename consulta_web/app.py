@@ -219,14 +219,25 @@ def index():
     holerits = query(
         f"""
         WITH movimentos AS (
-            SELECT funcionario_id, SUM(COALESCE(valor, 0)) AS valor_bruto
+            SELECT funcionario_id,
+                   SUM(CASE WHEN COALESCE(NULLIF(tipo, ''), 'DIARIA') = 'DIARIA'
+                            THEN COALESCE(valor, 0) ELSE 0 END) AS diarias,
+                   SUM(CASE WHEN COALESCE(NULLIF(tipo, ''), 'DIARIA') IN ('COMISSAO_QUEBRADOR', 'ONIBUS')
+                            THEN COALESCE(valor, 0) ELSE 0 END) AS comissoes,
+                   SUM(CASE WHEN COALESCE(NULLIF(tipo, ''), 'DIARIA') = 'DIARIA_MOTORISTA'
+                            THEN COALESCE(valor, 0) ELSE 0 END) AS motorista
             FROM diarias_funcionarios
             WHERE {MES_DIARIA_EXPR} = %s
             GROUP BY funcionario_id
         )
-        SELECT f.nome, COALESCE(m.valor_bruto, 0) AS valor_bruto,
+        SELECT f.nome,
+               COALESCE(m.diarias, 0) AS diarias,
+               COALESCE(m.comissoes, 0) AS comissoes,
+               COALESCE(m.motorista, 0) AS motorista,
+               COALESCE(m.diarias, 0) + COALESCE(m.comissoes, 0) + COALESCE(m.motorista, 0) AS valor_bruto,
                COALESCE(fp.vale, 0) AS vale, COALESCE(fp.inss, 0) AS inss,
-               COALESCE(fp.valor_liquido, COALESCE(m.valor_bruto, 0) - COALESCE(fp.vale, 0) - COALESCE(fp.inss, 0)) AS valor_liquido
+               (COALESCE(m.diarias, 0) + COALESCE(m.comissoes, 0) + COALESCE(m.motorista, 0)
+                - COALESCE(fp.vale, 0) - COALESCE(fp.inss, 0)) AS valor_liquido
         FROM movimentos m
         JOIN funcionarios f ON f.id = m.funcionario_id
         LEFT JOIN folha_pagamento fp ON fp.funcionario_id = f.id AND fp.mes = %s
@@ -491,16 +502,26 @@ def holerits():
     params = [mes, mes]
     sql = f"""
         WITH movimentos AS (
-            SELECT funcionario_id, SUM(COALESCE(valor, 0)) AS valor_bruto
+            SELECT funcionario_id,
+                   SUM(CASE WHEN COALESCE(NULLIF(tipo, ''), 'DIARIA') = 'DIARIA'
+                            THEN COALESCE(valor, 0) ELSE 0 END) AS diarias,
+                   SUM(CASE WHEN COALESCE(NULLIF(tipo, ''), 'DIARIA') IN ('COMISSAO_QUEBRADOR', 'ONIBUS')
+                            THEN COALESCE(valor, 0) ELSE 0 END) AS comissoes,
+                   SUM(CASE WHEN COALESCE(NULLIF(tipo, ''), 'DIARIA') = 'DIARIA_MOTORISTA'
+                            THEN COALESCE(valor, 0) ELSE 0 END) AS motorista
             FROM diarias_funcionarios
             WHERE {MES_DIARIA_EXPR} = %s
             GROUP BY funcionario_id
         )
         SELECT f.id, f.nome, COALESCE(f.cargo, '') AS cargo,
+               COALESCE(m.diarias, 0) AS diarias,
+               COALESCE(m.comissoes, 0) AS comissoes,
+               COALESCE(m.motorista, 0) AS motorista,
                COALESCE(fp.vale, 0) AS vale,
                COALESCE(fp.inss, 0) AS inss,
-               COALESCE(m.valor_bruto, 0) AS valor_bruto,
-               COALESCE(fp.valor_liquido, COALESCE(m.valor_bruto, 0) - COALESCE(fp.vale, 0) - COALESCE(fp.inss, 0)) AS valor_liquido
+               COALESCE(m.diarias, 0) + COALESCE(m.comissoes, 0) + COALESCE(m.motorista, 0) AS valor_bruto,
+               (COALESCE(m.diarias, 0) + COALESCE(m.comissoes, 0) + COALESCE(m.motorista, 0)
+                - COALESCE(fp.vale, 0) - COALESCE(fp.inss, 0)) AS valor_liquido
         FROM movimentos m
         JOIN funcionarios f ON f.id = m.funcionario_id
         LEFT JOIN folha_pagamento fp ON fp.funcionario_id = f.id AND fp.mes = %s
@@ -512,6 +533,9 @@ def holerits():
     sql += " ORDER BY f.nome"
     rows = query(sql, params)
     totais = {
+        "diarias": sum(float(r["diarias"] or 0) for r in rows),
+        "comissoes": sum(float(r["comissoes"] or 0) for r in rows),
+        "motorista": sum(float(r["motorista"] or 0) for r in rows),
         "bruto": sum(float(r["valor_bruto"] or 0) for r in rows),
         "vale": sum(float(r["vale"] or 0) for r in rows),
         "inss": sum(float(r["inss"] or 0) for r in rows),

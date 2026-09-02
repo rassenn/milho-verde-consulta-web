@@ -1,19 +1,22 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="hero compact">
-  <h1>Holerits</h1>
+  <h1>Holerits - Folha de Pagamento</h1>
   <form class="search multi" method="get">
     <input name="mes" value="{{ mes }}" placeholder="AAAA-MM">
-    <input name="q" value="{{ termo }}" placeholder="Funcionário">
+    <input name="q" value="{{ termo }}" placeholder="Funcionario">
     <button>Buscar</button>
   </form>
 </section>
 
-<section class="cards">
+<section class="cards holerit-summary">
+  <article><span>Diarias</span><strong>{{ totais.diarias|dinheiro }}</strong></article>
+  <article><span>Comissoes</span><strong>{{ totais.comissoes|dinheiro }}</strong></article>
+  <article><span>Motorista</span><strong>{{ totais.motorista|dinheiro }}</strong></article>
   <article><span>Bruto</span><strong>{{ totais.bruto|dinheiro }}</strong></article>
   <article><span>Vale</span><strong>{{ totais.vale|dinheiro }}</strong></article>
   <article><span>INSS</span><strong>{{ totais.inss|dinheiro }}</strong></article>
-  <article><span>Líquido</span><strong>{{ totais.liquido|dinheiro }}</strong></article>
+  <article><span>Liquido</span><strong>{{ totais.liquido|dinheiro }}</strong></article>
 </section>
 
 <section class="panel">
@@ -23,11 +26,14 @@
         <strong>{{ h.nome }}</strong>
         <small>{{ h.cargo }}</small>
       </div>
-      <div class="pay-grid">
+      <div class="pay-grid holerit-grid">
+        <span><small>Diarias</small>{{ h.diarias|dinheiro }}</span>
+        <span><small>Comissoes</small>{{ h.comissoes|dinheiro }}</span>
+        <span><small>Motorista</small>{{ h.motorista|dinheiro }}</span>
         <span><small>Bruto</small>{{ h.valor_bruto|dinheiro }}</span>
         <span><small>Vale</small>{{ h.vale|dinheiro }}</span>
         <span><small>INSS</small>{{ h.inss|dinheiro }}</span>
-        <span><small>Líquido</small>{{ h.valor_liquido|dinheiro }}</span>
+        <span><small>Liquido</small>{{ h.valor_liquido|dinheiro }}</span>
       </div>
     </div>
   {% else %}
